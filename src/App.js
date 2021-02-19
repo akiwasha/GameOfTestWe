@@ -1,24 +1,25 @@
-import logo from './logo.svg';
 import './App.css';
+import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
+import { CharacterDetails, Home, WishList } from './pages';
+import { Provider } from 'react-redux';
+import { createStore, combineReducers } from 'redux';
+
+// import wishList from './reducers/wishList';
+import characterNumber from './reducers/characterNumber';
+
+const store = createStore(combineReducers({ characterNumber }));
 
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Provider store={store}>
+      <Router>
+        <Switch>
+          <Route component={Home} path="/" exact />
+          <Route component={CharacterDetails} path="/character" exact />
+          <Route component={WishList} path="/wishlist" exact />
+        </Switch>
+      </Router>
+    </Provider>
   );
 }
 
