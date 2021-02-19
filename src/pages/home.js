@@ -3,9 +3,10 @@ import { Button, Card, Col, Row, Skeleton } from 'antd';
 import { Redirect } from 'react-router-dom';
 import { connect } from 'react-redux';
 import { dateFormatter } from '../helpers';
+import Nav from '../Nav';
 
-function Home({ addCharacterNumber }) {
-  const [booksData, setBooksData] = useState([]); //état les infos des livres
+function Home({ addCharacterUrl, addBookUrl }) {
+  const [booksData, setBooksData] = useState([]); //état lié aux infos des livres
   const [loadingBookPage, setLoadingBookPage] = useState(false); //état lié à l'indicateur de chargement du bouton "check character from this book"
   const [loadingRandomChar, setLoadingRandomChar] = useState(false); //état lié à l'indictaur de chargement du bouton "click me!"
 
@@ -16,17 +17,17 @@ function Home({ addCharacterNumber }) {
         `https://anapioficeandfire.com/api/books?pageSize=20`
       );
       const body = await data.json();
-      console.log(body);
       setBooksData(body);
     };
     fetchBooksData();
   }, []);
 
   //redirection vers la page dédiée au livre sélectionné
-  //   if (loadingBookPage) {
-  //     return <Redirect to="/characters" />;
-  //   }
+  if (loadingBookPage) {
+    return <Redirect to="/charactersbybook" />;
+  }
 
+  //redirection vers la page de personnage aléatoire
   if (loadingRandomChar) {
     return <Redirect to="/character" />;
   }
@@ -37,14 +38,7 @@ function Home({ addCharacterNumber }) {
   }
 
   const booksList = booksData.map((e, i) => (
-    <Col
-      xs={24}
-      md={12}
-      lg={6}
-      style={{ textAlign: 'center' }}
-      key={i}
-      // className="text-alt"
-    >
+    <Col xs={24} md={12} lg={6} style={{ textAlign: 'center' }} key={i}>
       <Card title={e.name} bordered={true} style={{ width: 300 }}>
         <p>Author(s): {e.authors.map((e) => e + ' \n')}</p>
         <p>Number of pages= {e.numberOfPages}</p>
@@ -54,8 +48,8 @@ function Home({ addCharacterNumber }) {
           type="primary"
           loading={loadingBookPage}
           onClick={() => {
+            addBookUrl(e.url);
             setLoadingBookPage(true);
-            // addBookNumber(i + 1);
           }}
         >
           Check characters from this book
@@ -66,6 +60,7 @@ function Home({ addCharacterNumber }) {
 
   return (
     <div>
+      <Nav />
       <h1 style={{ textAlign: 'center' }} className="text">
         Discover your favorite books and characters from the GoT universe!
       </h1>
@@ -81,7 +76,12 @@ function Home({ addCharacterNumber }) {
             loading={loadingRandomChar}
             onClick={() => {
               setLoadingRandomChar(true);
-              addCharacterNumber(Math.floor(Math.random() * 2100));
+              //génération d'un nombre aléatoire et insertion dans l'url pour accéder à un personnage aléatoire
+              addCharacterUrl(
+                `https://www.anapioficeandfire.com/api/characters/${Math.floor(
+                  Math.random() * 2100
+                )}`
+              );
             }}
           >
             Click me!
@@ -94,8 +94,11 @@ function Home({ addCharacterNumber }) {
 
 function mapDispatchToProps(dispatch) {
   return {
-    addCharacterNumber: function (characterNumber) {
-      dispatch({ type: 'addCharacterNumber', characterNumber });
+    addCharacterUrl: function (characterUrl) {
+      dispatch({ type: 'addCharacterUrl', characterUrl });
+    },
+    addBookUrl: function (bookUrl) {
+      dispatch({ type: 'addBookUrl', bookUrl });
     },
   };
 }

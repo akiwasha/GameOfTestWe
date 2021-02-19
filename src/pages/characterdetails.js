@@ -1,28 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import { Button, Card, Col, Row, Skeleton } from 'antd';
-// import { Redirect } from 'react-router-dom';
 import { connect } from 'react-redux';
+import Nav from '../Nav';
 
-function CharacterDetails({ characterNumber, addToWishList }) {
+function CharacterDetails({ characterUrl, addToWishList }) {
   const [characterDetails, setCharacterDetails] = useState(null); //état lié aux infos du personnage
 
   //au chargement de la page, appel de l'api pour récupérer les infos liées aux personnages et stocker dans characterDetails
   useEffect(() => {
     const fetchCharacterData = async () => {
-      const data = await fetch(
-        `https://anapioficeandfire.com/api/characters/${characterNumber}`
-      );
+      const data = await fetch(characterUrl);
       const body = await data.json();
-      console.log(body);
       setCharacterDetails(body);
     };
     fetchCharacterData();
-  }, [characterNumber]);
-
-  //redirection vers la page dédiée au livre sélectionné
-  // if (loadingBookPage) {
-  //   return <Redirect to="/characters" />;
-  // }
+  }, [characterUrl]);
 
   //afficher un indicateur de chargement en attendant la réponse de l'API
   if (characterDetails === null) {
@@ -32,7 +24,7 @@ function CharacterDetails({ characterNumber, addToWishList }) {
   const characterDetailsDisplay = (
     <Col xs={24} md={12} lg={6} style={{ textAlign: 'center' }}>
       <Card
-        title={characterDetails.name}
+        title={characterDetails.name ? characterDetails.name : 'Unknown'}
         bordered={true}
         style={{ width: 300 }}
       >
@@ -69,7 +61,7 @@ function CharacterDetails({ characterNumber, addToWishList }) {
         <Button
           type="primary"
           onClick={() => {
-            addToWishList(characterDetails.name);
+            addToWishList(characterDetails);
             alert('Character added to your wishlist!');
           }}
         >
@@ -81,23 +73,24 @@ function CharacterDetails({ characterNumber, addToWishList }) {
 
   return (
     <div>
+      <Nav />
       <h1 style={{ textAlign: 'center' }} className="text">
         {characterDetails.name}
       </h1>
 
-      <Row>{characterDetailsDisplay}</Row>
+      <Row style={{ textAlign: 'center' }}>{characterDetailsDisplay}</Row>
     </div>
   );
 }
 
 function mapStateToProps(state) {
-  return { characterNumber: state.characterNumber };
+  return { characterUrl: state.characterUrl };
 }
 
 function mapDispatchToProps(dispatch) {
   return {
     addToWishList: function (character) {
-      dispatch({ type: 'addToWishList', character });
+      dispatch({ type: 'addToWishList', characterLiked: character });
     },
   };
 }
